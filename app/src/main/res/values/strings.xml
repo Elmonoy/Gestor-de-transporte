@@ -1,0 +1,6 @@
+<!-- res/values/strings.xml -->
+<resources>
+    <string name="app_name">GRTKEYS</string>
+    <string name="default_web_client_id">55119574123-i74oiap201bg8gopf1p04rh0d2fn70cr.apps.googleusercontent.com</string>
+    <string name="calcula_tu_ruta">Calcula tu ruta</string>
+</resources>

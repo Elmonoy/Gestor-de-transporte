@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "55119574123",
+    "project_id": "grtkeys-ea0e7",
+    "storage_bucket": "grtkeys-ea0e7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:55119574123:android:5f83f0bc58b708e8dded2e",
+        "android_client_info": {
+          "package_name": "com.example.grtkeys"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "55119574123-i74oiap201bg8gopf1p04rh0d2fn70cr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.grtkeys",
+            "certificate_hash": "9a2f23e200eac2301fc71b9d5014004ab9e17dbd"
+          }
+        },
+        {
+          "client_id": "55119574123-eg99k0fsl3e4vhk2neke7grlr2l2dfah.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAXUAUyeleLHtNdOzsWSck0n2yLxopA-DQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "55119574123-eg99k0fsl3e4vhk2neke7grlr2l2dfah.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
