@@ -52,16 +52,15 @@ android {
 }
 
 dependencies {
-    implementation ("androidx.compose.material3:material3:1.2.1")
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3")
+    implementation ("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1")
     implementation ("com.google.android.gms:play-services-location:21.3.0")
     implementation ("com.google.android.gms:play-services-maps:18.1.0")
-    implementation ("androidx.compose.material3:material3:1.2.1")
-    implementation ("com.google.android.gms:play-services-auth:21.2.0")
+    implementation ("androidx.compose.material3:material3:1.0.0")
+    implementation ("com.google.android.gms:play-services-auth:20.2.0")
     implementation(libs.androidx.navigation)
-    implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
+    implementation(platform("com.google.firebase:firebase-bom:32.3.1"))
     implementation("com.google.firebase:firebase-analytics-ktx")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
