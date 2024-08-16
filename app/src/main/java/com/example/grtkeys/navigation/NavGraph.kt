@@ -1,12 +1,11 @@
-package com.example.grtkeys.navigation
-
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.grtkeys.MapAbiActivity
+import com.example.grtkeys.MapScreen
 import com.example.grtkeys.screen.LoginScreen
+
 import com.example.grtkeys.screen.NextScreen
 import com.example.grtkeys.screen.PaginaPrincipal
 
@@ -22,8 +21,9 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
         composable("nextScreen") {
             NextScreen(navController = navController)
         }
-        composable("MapLogin") {
-            MapAbiActivity()
+        composable("mapScreen") {
+            MapScreen()
         }
+
     }
 }

@@ -41,13 +41,13 @@ fun NextScreen(navController: NavHostController, modifier: Modifier = Modifier) 
                 val path = Path().apply {
                     moveTo(0f, 0f)
                     lineTo(size.width, 0f)
-                    lineTo(size.width, size.height * 0.4f) // Ajuste para bajar la altura de la capa negra
+                    lineTo(size.width, size.height * 0.4f)
                     lineTo(0f, size.height)
                     close()
                 }
                 canvas.drawPath(path, androidx.compose.ui.graphics.Paint().apply {
                     color = Color.Black
-                    alpha = 0.7f // Ajusta la opacidad si es necesario
+                    alpha = 0.7f
                 })
             }
         }
@@ -60,10 +60,9 @@ fun NextScreen(navController: NavHostController, modifier: Modifier = Modifier) 
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Dieseño de la capa negra
             Text(
                 text = "Para registrarse escribe un nombre de usuario",
-                style = MaterialTheme.typography.headlineLarge.copy(fontSize = 26.sp), // Ajuste de tamaño de fuente
+                style = MaterialTheme.typography.headlineLarge.copy(fontSize = 26.sp),
                 color = Color.White,
                 modifier = Modifier.padding(bottom = 15.dp)
             )
@@ -77,27 +76,20 @@ fun NextScreen(navController: NavHostController, modifier: Modifier = Modifier) 
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-
                 modifier = Modifier
                     .fillMaxWidth()
-
                     .padding(bottom = 30.dp)
                     .clip(RoundedCornerShape(20.dp)),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Gray,
-                        unfocusedLabelColor = Color.White,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent
-                    )
-
-
-
-
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.Gray,
+                    unfocusedLabelColor = Color.White,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent
+                )
             )
 
             Button(
-                onClick = { navController.navigate("MapLogin") },
-
+                onClick = { navController.navigate("mapScreen") },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                 modifier = Modifier.fillMaxWidth()
             ) {
