@@ -112,7 +112,7 @@ fun LoginScreen(navController: NavHostController, modifier: Modifier = Modifier)
                 modifier = Modifier.padding(bottom = 20.dp)
             )
             Button(
-                onClick = { /* TODO: Acción para ingresar */ },
+                onClick =  { navController.navigate("LoginPasajero") } ,
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                 modifier = Modifier
                     .fillMaxWidth()

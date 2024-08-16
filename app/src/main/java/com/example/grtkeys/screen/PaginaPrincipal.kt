@@ -68,7 +68,7 @@ fun PaginaPrincipal(navController: NavHostController, modifier: Modifier = Modif
                 modifier = Modifier.padding(bottom = 16.dp)
             )
             Button(
-                onClick = { /* TODO: Navegar a la vista de conductor */ },
+                onClick = { navController.navigate("LoginConductor") },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                 modifier = Modifier
                     .fillMaxWidth()

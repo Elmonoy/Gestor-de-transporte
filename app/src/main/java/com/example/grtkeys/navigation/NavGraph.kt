@@ -4,6 +4,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.grtkeys.MapScreen
+import com.example.grtkeys.conductor.LoginConductor
+import com.example.grtkeys.screen.LoginPasajero
 import com.example.grtkeys.screen.LoginScreen
 
 import com.example.grtkeys.screen.NextScreen
@@ -22,6 +24,19 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
             NextScreen(navController = navController)
         }
         composable("mapScreen") {
+            MapScreen()
+        }
+        composable("LoginConductor") {
+            LoginConductor(navController = navController)
+        }
+        composable("LoginPasajero") {
+            LoginPasajero(navController = navController)
+        }
+
+        composable("LoginPasajeroMap") {
+            MapScreen()
+        }
+        composable("LoginConductorMap") {
             MapScreen()
         }
 
