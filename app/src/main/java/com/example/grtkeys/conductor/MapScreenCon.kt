@@ -1,4 +1,8 @@
-package com.example.grtkeys
+package com.example.grtkeys.conductor
+
+import com.example.grtkeys.ApiService
+
+
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -26,23 +30,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-
-
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
-import androidx.navigation.NavHostController
-
 @Composable
-fun MapScreen(navController: NavHostController) {// BUENO
+fun MapScreenCon() {
     val context = LocalContext.current
     val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
 
@@ -51,7 +40,6 @@ fun MapScreen(navController: NavHostController) {// BUENO
     var polylinePoints by remember { mutableStateOf(emptyList<LatLng>()) }
     var durationText by remember { mutableStateOf("") }
     var location by remember { mutableStateOf<LatLng?>(null) }
-    var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
 
     val locationPermissionGranted = remember { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(
@@ -63,7 +51,6 @@ fun MapScreen(navController: NavHostController) {// BUENO
             fusedLocationClient.lastLocation.addOnSuccessListener { loc: Location? ->
                 loc?.let {
                     location = LatLng(it.latitude, it.longitude)
-                    start = location // Asignar la ubicación actual como el punto de inicio
                 }
             }
         }
@@ -77,7 +64,6 @@ fun MapScreen(navController: NavHostController) {// BUENO
             fusedLocationClient.lastLocation.addOnSuccessListener { loc: Location? ->
                 loc?.let {
                     location = LatLng(it.latitude, it.longitude)
-                    start = location // Asignar la ubicación actual como el punto de inicio
                 }
             }
         } else {
@@ -95,39 +81,6 @@ fun MapScreen(navController: NavHostController) {// BUENO
 
     if (locationPermissionGranted.value) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Barra superior con buscador y botón de configuración
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(Color.White)
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Campo de búsqueda
-                BasicTextField(
-                    value = searchQuery,
-                    onValueChange = { newValue -> searchQuery = newValue },
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 8.dp)
-                        .background(Color.LightGray, shape = MaterialTheme.shapes.small)
-                        .padding(8.dp),
-                    textStyle = TextStyle(fontSize = 18.sp)
-                )
-
-                // Botón de configuración
-                Button(
-                    onClick = {
-                        navController.navigate("settingsScreen")
-                    },
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(Color.Gray)
-                ) {
-                    Text("⚙️", style = TextStyle(fontSize = 24.sp))
-                }
-            }
-
             GoogleMap(
                 modifier = Modifier.weight(1f),
                 cameraPositionState = cameraPositionState,
@@ -138,7 +91,10 @@ fun MapScreen(navController: NavHostController) {// BUENO
                     myLocationButtonEnabled = true // Mostrar botón de mi ubicación
                 ),
                 onMapClick = { latLng ->
-                    if (end == null) {
+                    if (start == null) {
+                        start = latLng
+                        Toast.makeText(context, "Selecciona el punto final", Toast.LENGTH_SHORT).show()
+                    } else if (end == null) {
                         end = latLng
                         createRoute(start!!, end!!) { route, duration ->
                             polylinePoints = route
@@ -155,21 +111,23 @@ fun MapScreen(navController: NavHostController) {// BUENO
                 }
                 if (polylinePoints.isNotEmpty()) {
                     Polyline(points = polylinePoints)
+
                 }
             }
 
             Button(
                 onClick = {
+                    start = null
                     end = null
                     polylinePoints = emptyList()
                     durationText = ""
-                    Toast.makeText(context, "Selecciona el punto de destino", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Selecciona punto de origen y final", Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier
                     .padding(16.dp)
                     .wrapContentSize()
             ) {
-                Text(text = "Calcular Ruta")
+                Text(text = "Crear Rutas")
             }
 
             // Mostrar el tiempo estimado de viaje
@@ -191,7 +149,6 @@ fun MapScreen(navController: NavHostController) {// BUENO
         Toast.makeText(context, "Permisos de ubicación no concedidos", Toast.LENGTH_SHORT).show()
     }
 }
-
 
 private fun createRoute(start: LatLng, end: LatLng, onRouteReady: (List<LatLng>, String) -> Unit) {
     CoroutineScope(Dispatchers.IO).launch {

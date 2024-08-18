@@ -5,11 +5,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.grtkeys.MapScreen
 import com.example.grtkeys.conductor.LoginConductor
+import com.example.grtkeys.conductor.MapScreenCon
+import com.example.grtkeys.screen.EditUserScreen
 import com.example.grtkeys.screen.LoginPasajero
 import com.example.grtkeys.screen.LoginScreen
 
 import com.example.grtkeys.screen.NextScreen
 import com.example.grtkeys.screen.PaginaPrincipal
+import com.example.grtkeys.screen.SettingsScreen
 
 @Composable
 fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
@@ -24,7 +27,7 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
             NextScreen(navController = navController)
         }
         composable("mapScreen") {
-            MapScreen()
+            MapScreen(navController = navController)
         }
         composable("LoginConductor") {
             LoginConductor(navController = navController)
@@ -32,13 +35,24 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
         composable("LoginPasajero") {
             LoginPasajero(navController = navController)
         }
-
         composable("LoginPasajeroMap") {
-            MapScreen()
+            MapScreen(navController = navController)
         }
         composable("LoginConductorMap") {
-            MapScreen()
+            MapScreenCon()
         }
-
+        composable("settingsScreen") {
+            SettingsScreen(navController = navController)
+        }
+        composable("edit_user") { backStackEntry ->
+            EditUserScreen(
+                currentUserName = "Nombre Actual", // Estos valores pueden ser dinámicos
+                currentUserEmail = "email@example.com",
+                navController = navController, // Asegúrate de pasar el navController aquí
+                onSave = { newName, newEmail ->
+                    // Lógica para manejar el guardado
+                }
+            )
+        }
     }
 }

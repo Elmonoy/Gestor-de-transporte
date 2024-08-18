@@ -30,7 +30,7 @@ import com.example.grtkeys.R
 fun LoginConductor(navController: NavHostController) {
     // Variables de estado para los campos de texto
     var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var verificationCode by remember { mutableStateOf("") }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -87,19 +87,21 @@ fun LoginConductor(navController: NavHostController) {
                 textAlign = TextAlign.Start,
 
                 )
-            TextField(
+            OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 30.dp)
-                    .clip(RoundedCornerShape(20.dp)),
+                    .padding(bottom = 50.dp)
+                    .clip(RoundedCornerShape(50.dp)),
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = Color.Gray,
+                    unfocusedLabelColor = Color.White,
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent
                 )
             )
+
 
             Text(
                 text = "CONTRASEÑA",
@@ -112,19 +114,22 @@ fun LoginConductor(navController: NavHostController) {
                 textAlign = TextAlign.Start,
 
                 )
-            TextField(
-                value = email,
-                onValueChange = { email = it },
+            OutlinedTextField(
+                value = password,
+                onValueChange = { password = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 50.dp)
-                    .clip(RoundedCornerShape(20.dp)),
+                    .clip(RoundedCornerShape(50.dp)),
                 colors = TextFieldDefaults.textFieldColors(
                     containerColor = Color.Gray,
+                    unfocusedLabelColor = Color.White,
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent
                 )
             )
+
+
 
             Button(
                 onClick = { navController.navigate("LoginConductorMap") },
