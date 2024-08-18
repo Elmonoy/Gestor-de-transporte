@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 
 @Composable
@@ -116,15 +117,17 @@ fun MapScreen(navController: NavHostController) {// BUENO
                 )
 
                 // Botón de configuración
-                Button(
+                IconButton(
                     onClick = {
                         navController.navigate("settingsScreen")
                     },
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(Color.Gray)
+                    modifier = Modifier.size(48.dp) // Tamaño del icono
                 ) {
-                    Text("⚙️", style = TextStyle(fontSize = 24.sp))
+                    Icon(
+                        painter = painterResource(id = R.drawable.btnconfig), // Asegúrate de tener esta imagen en res/drawable
+                        contentDescription = "Configuración",
+                        tint = Color.Gray // Puedes ajustar el color del icono si es necesario
+                    )
                 }
             }
 
