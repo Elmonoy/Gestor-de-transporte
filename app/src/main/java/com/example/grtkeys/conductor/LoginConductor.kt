@@ -13,6 +13,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -149,7 +150,8 @@ fun LoginConductor(navController: NavHostController) {
                     unfocusedLabelColor = Color.White,
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent
-                )
+                ),
+                visualTransformation = PasswordVisualTransformation() // Aquí se aplica la encriptación con punticos
             )
 
             // Mostrar mensaje de error si es necesario
