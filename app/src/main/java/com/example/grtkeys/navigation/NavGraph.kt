@@ -4,11 +4,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.grtkeys.MapScreen
-import com.example.grtkeys.conductor.LoginConductor
+
 import com.example.grtkeys.conductor.MapScreenCon
 import com.example.grtkeys.screen.EditUserScreen
 import com.example.grtkeys.screen.LoginPasajero
-import com.example.grtkeys.screen.LoginScreen
+
 
 import com.example.grtkeys.screen.NextScreen
 import com.example.grtkeys.screen.PaginaPrincipal

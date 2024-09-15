@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.INTERNET"/>
 
     <application
+        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -20,7 +21,7 @@
             android:value="AIzaSyCXy-L_O9oQTmlCDJasAHmEMKKYkbZcKnU"/>
 
         <activity
-            android:name=".MainActivity"
+            android:name="MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.GRTKEYS">

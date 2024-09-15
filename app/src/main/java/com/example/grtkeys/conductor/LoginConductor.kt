@@ -1,7 +1,3 @@
-package com.example.grtkeys.conductor
-
-
-
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -22,16 +18,47 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.grtkeys.R
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+
+private val db = FirebaseFirestore.getInstance()
+private val auth = FirebaseAuth.getInstance()
+
+// Función para verificar si las credenciales coinciden
+suspend fun verifyConductorCredentials(identificacion: String, contraseña: String): Boolean {
+    return try {
+        println("Verificando credenciales: identificacion=$identificacion, contraseña=$contraseña")
+
+        val querySnapshot = db.collection("conductores")
+            .whereEqualTo("IDENTIFICACION", identificacion)
+            .whereEqualTo("CONTRASEÑA", contraseña)
+            .get().await()
+
+        println("Documentos encontrados: ${querySnapshot.size()}")
+
+        // Si se encuentra un documento que coincida, devolver true
+        !querySnapshot.isEmpty
+    } catch (e: Exception) {
+        e.printStackTrace()
+        false
+    }
+}
+
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-
 fun LoginConductor(navController: NavHostController) {
-    // Variables de estado para los campos de texto
-    var username by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var verificationCode by remember { mutableStateOf("") }
+    // Variables de estado para los campos de texto y los mensajes de error
+    var identificacion by remember { mutableStateOf("") }
+    var contraseña by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isLoading by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Imagen de fondo
@@ -73,8 +100,7 @@ fun LoginConductor(navController: NavHostController) {
                     .fillMaxWidth()
                     .padding(bottom = 30.dp),
                 textAlign = TextAlign.Center,
-
-                )
+            )
 
             Text(
                 text = "IDENTIFICACION",
@@ -85,11 +111,10 @@ fun LoginConductor(navController: NavHostController) {
                     .fillMaxWidth()
                     .padding(bottom = 6.dp),
                 textAlign = TextAlign.Start,
-
-                )
+            )
             OutlinedTextField(
-                value = username,
-                onValueChange = { username = it },
+                value = identificacion,
+                onValueChange = { identificacion = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 50.dp)
@@ -101,7 +126,6 @@ fun LoginConductor(navController: NavHostController) {
                     focusedIndicatorColor = Color.Transparent
                 )
             )
-
 
             Text(
                 text = "CONTRASEÑA",
@@ -112,11 +136,10 @@ fun LoginConductor(navController: NavHostController) {
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
                 textAlign = TextAlign.Start,
-
-                )
+            )
             OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
+                value = contraseña,
+                onValueChange = { contraseña = it },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 50.dp)
@@ -129,10 +152,34 @@ fun LoginConductor(navController: NavHostController) {
                 )
             )
 
-
+            // Mostrar mensaje de error si es necesario
+            errorMessage?.let {
+                Text(
+                    text = it,
+                    color = Color.Red,
+                    style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 16.sp),
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
 
             Button(
-                onClick = { navController.navigate("LoginConductorMap") },
+                onClick = {
+                    // Llamar a la función de verificación en una corutina
+                    CoroutineScope(Dispatchers.IO).launch {
+                        isLoading = true
+                        val credentialsMatch = verifyConductorCredentials(identificacion, contraseña)
+                        withContext(Dispatchers.Main) {
+                            isLoading = false
+                            if (credentialsMatch) {
+                                // Redirigir al usuario si las credenciales coinciden
+                                navController.navigate("LoginConductorMap")
+                            } else {
+                                // Mostrar mensaje de error si las credenciales no coinciden
+                                errorMessage = "Credenciales incorrectas."
+                            }
+                        }
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Red,
                     contentColor = Color.White // Cambia el color del texto a blanco para contraste
@@ -149,12 +196,10 @@ fun LoginConductor(navController: NavHostController) {
                     )
                 )
             }
+
+            if (isLoading) {
+                CircularProgressIndicator()
+            }
         }
     }
 }
-
-
-
-
-
-

@@ -53,6 +53,10 @@ android {
 
 dependencies {
 
+
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+
     implementation ("androidx.compose.material3:material3:1.0.0")
     implementation ("androidx.compose.material:material-icons-extended:1.3.0" )
 
@@ -69,6 +73,8 @@ dependencies {
     implementation(libs.androidx.navigation)
     implementation(platform("com.google.firebase:firebase-bom:33.1.2"))
     implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-database-ktx:20.2.2")
+    implementation("com.google.firebase:firebase-firestore-ktx:24.8.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

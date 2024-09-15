@@ -1,4 +1,3 @@
-package com.example.grtkeys.screen
 
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -24,10 +23,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthException
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthUserCollisionException
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
-
 @Composable
 fun LoginScreen(navController: NavHostController, modifier: Modifier = Modifier) {
     val context = LocalContext.current
@@ -55,12 +56,14 @@ fun LoginScreen(navController: NavHostController, modifier: Modifier = Modifier)
                 val credential = GoogleAuthProvider.getCredential(account.idToken, null)
                 coroutineScope.launch {
                     try {
-                        val authResult = firebaseAuth.signInWithCredential(credential).await()
-                        if (authResult.user != null) {
-                            // Inicio de sesión exitoso
-                            loginMessage = "Inicio de sesión correcto"
-                            navController.navigate("nextScreen") // Navega a la pantalla de ingreso de nombre de usuario
-                        }
+                        // Intentar registrar al usuario
+                        firebaseAuth.createUserWithEmailAndPassword(account.email!!, "passwordTemporal").await()
+                        // Si el registro es exitoso
+                        loginMessage = "Registro exitoso"
+                        navController.navigate("mapScreen") // Navega a la pantalla de configuración de perfil
+                    } catch (e: FirebaseAuthUserCollisionException) {
+                        // El usuario ya existe, manejar la excepción si es necesario
+                        loginMessage = "El usuario ya está registrado. Intenta iniciar sesión."
                     } catch (e: Exception) {
                         Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
@@ -112,7 +115,7 @@ fun LoginScreen(navController: NavHostController, modifier: Modifier = Modifier)
                 modifier = Modifier.padding(bottom = 20.dp)
             )
             Button(
-                onClick =  { navController.navigate("LoginPasajero") } ,
+                onClick = { navController.navigate("LoginPasajero") },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -137,7 +140,7 @@ fun LoginScreen(navController: NavHostController, modifier: Modifier = Modifier)
                 Text(text = "Registrarse con Google", color = Color.Black)
             }
 
-            // Mostrar el mensaje de inicio de sesión correcto si existe
+            // Mostrar el mensaje de registro si existe
             loginMessage?.let {
                 Spacer(modifier = Modifier.height(16.dp))
                 Text(text = it, color = Color.Green, fontSize = 20.sp)

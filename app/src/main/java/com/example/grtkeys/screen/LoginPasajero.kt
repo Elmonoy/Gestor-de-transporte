@@ -1,6 +1,6 @@
 package com.example.grtkeys.screen
 
-
+import android.widget.Toast
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
@@ -13,6 +13,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -21,42 +22,55 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.grtkeys.R
-
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException
+import com.google.firebase.auth.FirebaseAuthInvalidUserException
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SnackbarDefaults
+import androidx.compose.material3.SnackbarDuration
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-
 fun LoginPasajero(navController: NavHostController) {
-    // Variables de estado para los campos de texto
-    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var verificationCode by remember { mutableStateOf("") }
+    val context = LocalContext.current
+    val firebaseAuth = FirebaseAuth.getInstance()
+    var verificationMessage by remember { mutableStateOf<String?>(null) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
+    // Cerrar sesión automáticamente cuando la pantalla se carga
+    LaunchedEffect(Unit) {
+        firebaseAuth.signOut() // Cierra la sesión al iniciar la pantalla
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Imagen de fondo
         Image(
             painter = painterResource(id = R.drawable.fondo_buslp),
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-        // Capa de color negro diagonal en el lado izquierdo
+
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawIntoCanvas { canvas ->
                 val path = androidx.compose.ui.graphics.Path().apply {
                     moveTo(0f, 0f)
                     lineTo(size.width, 0f)
-                    lineTo(size.width, size.height * 0.4f) // Ajuste para bajar la altura de la capa negra
+                    lineTo(size.width, size.height * 0.4f)
                     lineTo(0f, size.height)
                     close()
                 }
                 canvas.drawPath(path, androidx.compose.ui.graphics.Paint().apply {
                     color = Color.Black
-                    alpha = 0.7f // Ajusta la opacidad si es necesario
+                    alpha = 0.7f
                 })
             }
         }
-        // Contenido dentro de la capa negra
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -71,46 +85,20 @@ fun LoginPasajero(navController: NavHostController) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                textAlign = TextAlign.Center,
-
-                )
-
-            Text(
-                text = "NOMBRE USUARIO",
-                fontSize = 14.sp,
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 36.sp),
-                color = Color.White,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 6.dp),
-                textAlign = TextAlign.Start,
-
-                )
-            TextField(
-                value = username,
-                onValueChange = { username = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-                    .clip(RoundedCornerShape(20.dp)),
-                colors = TextFieldDefaults.textFieldColors(
-                    containerColor = Color.Gray,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    focusedIndicatorColor = Color.Transparent
-                )
+                textAlign = TextAlign.Center
             )
 
             Text(
-                text = "CORREO ELECTRONICO",
+                text = "CORREO ELECTRÓNICO",
                 fontSize = 14.sp,
                 style = MaterialTheme.typography.bodyLarge.copy(fontSize = 24.sp),
                 color = Color.White,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
-                textAlign = TextAlign.Start,
+                textAlign = TextAlign.Start
+            )
 
-                )
             TextField(
                 value = email,
                 onValueChange = { email = it },
@@ -125,75 +113,148 @@ fun LoginPasajero(navController: NavHostController) {
                 )
             )
 
-            Text(
-                text = "CODIGO DE VERIFICACION",
-                fontSize = 14.sp,
-                style = MaterialTheme.typography.bodyLarge.copy(fontSize = 24.sp),
-                color = Color.White,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 0.dp),
-                textAlign = TextAlign.Start,
-
-                )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            ) {
-                TextField(
-                    value = verificationCode,
-                    onValueChange = { verificationCode = it },
-                    modifier = Modifier.weight(1f)
-                        .clip(RoundedCornerShape(20.dp)),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Gray,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent
-                    )
-                )
-
-                Spacer(modifier = Modifier.width(8.dp))
-
-                Button(
-                    onClick = { /* Acción para enviar el código */ },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.Red,
-                        contentColor = Color.White // Cambia el color del texto a blanco para contraste
-                    ),
-                    modifier = Modifier
-                        .padding(10.dp) // Ajusta el padding alrededor del botón
-                        .size(150.dp, 50.dp) // Ajusta el tamaño del botón
-                ) {
-                    Text(
-                        text = "Enviar Código",
-                        style = TextStyle(
-                            fontWeight = FontWeight.Bold, // Configura el texto en negrita
-                            fontSize = 16.sp // Tamaño de fuente para el texto
-                        )
-                    )
-                }
-            }
             Button(
-                onClick = { navController.navigate("LoginPasajeroMap")  },
+                onClick = {
+                    if (email.isNotEmpty()) {
+                        firebaseAuth.signInWithEmailAndPassword(email, "passwordTemporal")
+                            .addOnCompleteListener { authTask ->
+                                if (authTask.isSuccessful) {
+                                    firebaseAuth.currentUser?.reload()?.addOnCompleteListener { reloadTask ->
+                                        if (reloadTask.isSuccessful) {
+                                            val currentUser = firebaseAuth.currentUser
+                                            if (currentUser != null && !currentUser.isEmailVerified) {
+                                                // Enviar el correo de verificación si no está verificado
+                                                currentUser.sendEmailVerification()
+                                                    .addOnCompleteListener { verificationTask ->
+                                                        if (verificationTask.isSuccessful) {
+                                                            verificationMessage = "Correo de verificación enviado a $email."
+                                                        } else {
+                                                            verificationMessage = "Error al enviar el correo: ${verificationTask.exception?.message}"
+                                                        }
+                                                        coroutineScope.launch {
+                                                            snackbarHostState.showSnackbar(verificationMessage ?: "", duration = SnackbarDuration.Short)
+                                                        }
+                                                    }
+                                            } else if (currentUser != null && currentUser.isEmailVerified) {
+                                                verificationMessage = "El correo ya está verificado. Por favor, inicia sesión."
+                                                coroutineScope.launch {
+                                                    snackbarHostState.showSnackbar(verificationMessage ?: "", duration = SnackbarDuration.Short)
+                                                }
+                                            }
+                                        } else {
+                                            verificationMessage = "Error al recargar el estado del usuario."
+                                            coroutineScope.launch {
+                                                snackbarHostState.showSnackbar(verificationMessage ?: "", duration = SnackbarDuration.Short)
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    verificationMessage = "Error de autenticación: ${authTask.exception?.message}"
+                                    coroutineScope.launch {
+                                        snackbarHostState.showSnackbar(verificationMessage ?: "", duration = SnackbarDuration.Short)
+                                    }
+                                }
+                            }
+                    } else {
+                        Toast.makeText(context, "Por favor ingresa un correo electrónico.", Toast.LENGTH_SHORT).show()
+                    }
+                },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Red,
-                    contentColor = Color.White // Cambia el color del texto a blanco para contraste
+                    contentColor = Color.White
                 ),
                 modifier = Modifier
-                    .padding(10.dp) // Ajusta el padding alrededor del botón
-                    .size(250.dp, 50.dp) // Ajusta el tamaño del botón
+                    .padding(10.dp)
+                    .size(250.dp, 50.dp)
+            ) {
+                Text(
+                    text = "Enviar Código",
+                    style = TextStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp
+                    )
+                )
+            }
+
+            Button(
+                onClick = {
+                    if (email.isNotEmpty()) {
+                        firebaseAuth.signInWithEmailAndPassword(email, "passwordTemporal")
+                            .addOnCompleteListener { signInTask ->
+                                if (signInTask.isSuccessful) {
+                                    firebaseAuth.currentUser?.let { currentUser ->
+                                        currentUser.reload().addOnCompleteListener { reloadTask ->
+                                            if (reloadTask.isSuccessful) {
+                                                if (currentUser.isEmailVerified) {
+                                                    // Navegar al mapa solo si el correo ya está verificado
+                                                    navController.navigate("LoginPasajeroMap")
+                                                } else {
+                                                    // Solicitar que verifique el correo si no está verificado
+                                                    coroutineScope.launch {
+                                                        snackbarHostState.showSnackbar(
+                                                            "Por favor, verifica tu correo antes de continuar.",
+                                                            duration = SnackbarDuration.Short
+                                                        )
+                                                    }
+                                                }
+                                            } else {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Error al recargar el estado del usuario.",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    val exception = signInTask.exception
+                                    if (exception is FirebaseAuthInvalidUserException) {
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                "El correo no está registrado. Por favor, regístrate.",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
+                                    } else if (exception is FirebaseAuthInvalidCredentialsException) {
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                "Contraseña incorrecta. Inténtalo de nuevo.",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
+                                    } else {
+                                        coroutineScope.launch {
+                                            snackbarHostState.showSnackbar(
+                                                "Error al iniciar sesión: ${exception?.message}",
+                                                duration = SnackbarDuration.Short
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                    } else {
+                        Toast.makeText(context, "Por favor ingresa un correo electrónico.", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Red,
+                    contentColor = Color.White
+                ),
+                modifier = Modifier
+                    .padding(10.dp)
+                    .size(250.dp, 50.dp)
             ) {
                 Text(
                     text = "Iniciar Sesión",
                     style = TextStyle(
-                        fontWeight = FontWeight.Bold, // Configura el texto en negrita
-                        fontSize = 25.sp // Tamaño de fuente para el texto
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp
                     )
                 )
             }
         }
+
+        // Snackbar Host para mostrar mensajes flotantes
+        SnackbarHost(hostState = snackbarHostState)
     }
 }
-
