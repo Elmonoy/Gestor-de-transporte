@@ -39,6 +39,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import androidx.navigation.NavHostController
 import androidx.compose.ui.res.painterResource
 import com.google.android.gms.maps.model.MapStyleOptions
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
 
 
 private val darkModeStyle = """
@@ -205,17 +207,21 @@ private val darkModeStyle = """
 ]
 """
 
+
 @Composable
 fun MapScreen(navController: NavHostController) {
+    // Estados para el diálogo de confirmación
+    var showLogoutDialog by remember { mutableStateOf(false) }
+
     val context = LocalContext.current
     val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
 
     var start by remember { mutableStateOf<LatLng?>(null) }
     var end by remember { mutableStateOf<LatLng?>(null) }
-    var polylinePoints by remember { mutableStateOf(emptyList<LatLng>()) } // Polilínea para la ruta calculada
-    var searchedPolylinePoints by remember { mutableStateOf(emptyList<LatLng>()) } // Polilínea para la ruta buscada
-    var durationText by remember { mutableStateOf("") } // Tiempo estimado para la ruta calculada
-    var searchedDurationText by remember { mutableStateOf("") } // Tiempo estimado para la ruta buscada
+    var polylinePoints by remember { mutableStateOf(emptyList<LatLng>()) }
+    var searchedPolylinePoints by remember { mutableStateOf(emptyList<LatLng>()) }
+    var durationText by remember { mutableStateOf("") }
+    var searchedDurationText by remember { mutableStateOf("") }
     var location by remember { mutableStateOf<LatLng?>(null) }
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     var searchResults by remember { mutableStateOf(emptyList<SearchResult>()) }
@@ -273,7 +279,7 @@ fun MapScreen(navController: NavHostController) {
                         name = doc.getString("nombreRuta") ?: "",
                         startLatLng = LatLng(origenLat, origenLng),
                         endLatLng = LatLng(destinoLat, destinoLng),
-                        id = doc.id // Asignar ID del documento
+                        id = doc.id
                     )
                 }
                 searchResults = results
@@ -287,13 +293,11 @@ fun MapScreen(navController: NavHostController) {
     fun showRouteOnMap(route: SearchResult) {
         CoroutineScope(Dispatchers.IO).launch {
             createRoute(route.startLatLng, route.endLatLng) { polyline, duration ->
-                // Actualiza la UI en el hilo principal
                 CoroutineScope(Dispatchers.Main).launch {
-                    searchedPolylinePoints = polyline // Asignar polilínea de búsqueda
-                    searchedDurationText = duration // Asignar tiempo estimado de la ruta buscada
+                    searchedPolylinePoints = polyline
+                    searchedDurationText = duration
                     Log.d("MapScreen", "Searched polyline points: $searchedPolylinePoints")
                     cameraPositionState.animate(CameraUpdateFactory.newLatLngZoom(route.startLatLng, 15f))
-                    // Vaciar los resultados de búsqueda para que solo se muestre la ruta seleccionada
                     searchResults = emptyList()
                 }
             }
@@ -303,14 +307,38 @@ fun MapScreen(navController: NavHostController) {
     fun calculateRoute(start: LatLng, end: LatLng) {
         CoroutineScope(Dispatchers.IO).launch {
             createRoute(start, end) { polyline, duration ->
-                // Actualiza la UI en el hilo principal
                 CoroutineScope(Dispatchers.Main).launch {
-                    polylinePoints = polyline // Asignar polilínea calculada
-                    durationText = duration // Asignar tiempo estimado de la ruta calculada
+                    polylinePoints = polyline
+                    durationText = duration
                     Log.d("MapScreen", "Calculated polyline points: $polylinePoints")
                 }
             }
         }
+    }
+
+    // Mostrar el diálogo de confirmación de cierre de sesión
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Confirmación") },
+            text = { Text("¿Quieres cerrar sesión?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showLogoutDialog = false
+                        // Navegar a la página de inicio de sesión (reemplaza con tu ruta real)
+                        navController.navigate("pagina_principal")
+                    }
+                ) {
+                    Text("Sí")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("No")
+                }
+            }
+        )
     }
 
     if (locationPermissionGranted.value) {
@@ -319,16 +347,17 @@ fun MapScreen(navController: NavHostController) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
+                    .background(Color(0xFF202f3e)) // Hacer la barra superior transparente
                     .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 // Campo de búsqueda
                 BasicTextField(
                     value = searchQuery,
                     onValueChange = { newValue ->
                         searchQuery = newValue
-                        searchRoutes(newValue.text) // Buscar mientras se escribe
+                        searchRoutes(newValue.text)
                     },
                     modifier = Modifier
                         .weight(1f)
@@ -338,17 +367,17 @@ fun MapScreen(navController: NavHostController) {
                     textStyle = TextStyle(fontSize = 18.sp)
                 )
 
-                // Botón de configuración
+                // Botón de cierre de sesión con ícono
                 IconButton(
-                    onClick = {
-                        navController.navigate("settingsScreen")
-                    },
-                    modifier = Modifier.size(48.dp)
+                    onClick = { showLogoutDialog = true },
+                    modifier = Modifier
+                        .padding(start = 5.dp)
+                        .size(38.dp)
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.btnconfig), // Asegúrate de tener esta imagen en res/drawable
-                        contentDescription = "Configuración",
-                        tint = Color.Gray
+                        painter = painterResource(id = R.drawable.salida),
+
+                        contentDescription = "Cerrar sesión",
                     )
                 }
             }
@@ -413,34 +442,32 @@ fun MapScreen(navController: NavHostController) {
             // Botón para calcular la ruta
             Column(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .background(Color(0xFF202f3e)) // Fondo negro para el área inferior
+                    .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Button(
                     onClick = {
                         end = null
-                        polylinePoints = emptyList() // Limpiar solo la polilínea calculada
-                        durationText = "" // Limpiar tiempo de ruta calculada
+                        polylinePoints = emptyList()
+                        durationText = ""
                         Toast.makeText(context, "Selecciona el punto de destino", Toast.LENGTH_SHORT).show()
                     },
+                    colors = ButtonDefaults.buttonColors(  Color(0xFF746855)), // Botón rojo
                     modifier = Modifier
+                        .fillMaxWidth()
                         .padding(bottom = 8.dp)
-                        .wrapContentSize()
                 ) {
-                    Text(text = "Calcular Ruta")
+                    Text(text = "Calcular ruta", color = Color.White) // Texto blanco en el botón
                 }
-
-                // Mostrar el tiempo estimado de la ruta calculada
                 if (durationText.isNotEmpty()) {
                     Text(
-                        text = "Duración estimada de la ruta calculada: $durationText",
+                        text = "Duración estimada de la ruta: $durationText",
                         modifier = Modifier.padding(bottom = 4.dp),
-                        style = TextStyle(fontSize = 16.sp, color = Color.Blue)
+                        style = TextStyle(fontSize = 16.sp, color = Color.Red)
                     )
                 }
-
-                // Mostrar el tiempo estimado de la ruta buscada
                 if (searchedDurationText.isNotEmpty()) {
                     Text(
                         text = "Duración estimada de la ruta buscada: $searchedDurationText",
@@ -455,7 +482,6 @@ fun MapScreen(navController: NavHostController) {
         Text(text = "Permiso de ubicación necesario")
     }
 }
-
 
 private fun createRoute(start: LatLng, end: LatLng, onRouteReady: (List<LatLng>, String) -> Unit) {
     CoroutineScope(Dispatchers.IO).launch {

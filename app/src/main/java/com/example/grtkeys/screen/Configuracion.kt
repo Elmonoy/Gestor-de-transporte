@@ -49,7 +49,8 @@ fun SettingsScreen(navController: NavHostController) {
             text = "Editar Datos",
             iconResId = R.drawable.persona, // Imagen para "Editar Datos"
             onClick = {
-                navController.navigate("edit_user") // Navega a la vista de EditUserScreen
+                // Navega a la vista de EditUserScreen
+                navController.navigate("edit_con")
             }
         )
 
@@ -92,4 +93,3 @@ fun LongButtonWithIcon(text: String, iconResId: Int, onClick: () -> Unit, button
         }
     }
 }
-

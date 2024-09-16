@@ -4,12 +4,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.grtkeys.MapScreen
-
 import com.example.grtkeys.conductor.MapScreenCon
-import com.example.grtkeys.screen.EditUserScreen
+import com.example.grtkeys.screen.EditConScreen
 import com.example.grtkeys.screen.LoginPasajero
-
-
 import com.example.grtkeys.screen.NextScreen
 import com.example.grtkeys.screen.PaginaPrincipal
 import com.example.grtkeys.screen.SettingsScreen
@@ -35,24 +32,18 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
         composable("LoginPasajero") {
             LoginPasajero(navController = navController)
         }
+        composable("LoginConductorMap") {
+            MapScreenCon(navController = navController)
+        }
         composable("LoginPasajeroMap") {
             MapScreen(navController = navController)
-        }
-        composable("LoginConductorMap") {
-            MapScreenCon()
         }
         composable("settingsScreen") {
             SettingsScreen(navController = navController)
         }
-        composable("edit_user") { backStackEntry ->
-            EditUserScreen(
-                currentUserName = "Nombre Actual", // Estos valores pueden ser dinámicos
-                currentUserEmail = "email@example.com",
-                navController = navController, // Asegúrate de pasar el navController aquí
-                onSave = { newName, newEmail ->
-                    // Lógica para manejar el guardado
-                }
-            )
+        composable("edit_con") {
+            EditConScreen (navController = navController)
         }
+
     }
 }

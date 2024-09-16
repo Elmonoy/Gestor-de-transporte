@@ -8,6 +8,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
@@ -33,11 +34,20 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import com.example.grtkeys.ApiService
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.Image
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.navigation.NavController
+import com.example.grtkeys.R
 
 
 @SuppressLint("StaticFieldLeak")
@@ -225,7 +235,7 @@ private val darkModeStyle = """
 
 
 @Composable
-fun MapScreenCon() {
+fun MapScreenCon(navController: NavController) {
     val context = LocalContext.current
     val fusedLocationClient: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(context)
     val firestore = FirebaseFirestore.getInstance()
@@ -276,11 +286,10 @@ fun MapScreenCon() {
     }
 
     if (locationPermissionGranted.value) {
-        // Envuelve todo en un Box para aplicar el fondo vinotinto
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF000000)) // Color vinotinto
+                .background(Color(0xFF242f3e)) // Color negro
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 GoogleMap(
@@ -338,7 +347,7 @@ fun MapScreenCon() {
                         },
                         modifier = Modifier.wrapContentSize(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Red // Color de fondo rojo para el botón
+                            containerColor = Color(0xFF746855) //0xFF746855 Color de fondo para el botón
                         )
                     ) {
                         Text(text = "Crear Rutas", color = Color.White)
@@ -356,88 +365,21 @@ fun MapScreenCon() {
                         }
                     }
                 }
+            }
 
-                if (showDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showDialog = false },
-                        title = { Text("Guardar Ruta") },
-                        text = {
-                            Column {
-                                TextField(
-                                    value = routeName,
-                                    onValueChange = { routeName = it },
-                                    label = { Text("Nombre de la ruta") }
-                                )
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                TextField(
-                                    value = driverName,
-                                    onValueChange = { driverName = it },
-                                    label = { Text("Nombre del conductor") }
-                                )
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                TextField(
-                                    value = vehiclePlate,
-                                    onValueChange = { vehiclePlate = it },
-                                    label = { Text("Placa del vehículo") }
-                                )
-                            }
-                        },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        try {
-                                            saveRouteToFirestore(
-                                                firestore = firestore,
-                                                routeName = routeName,
-                                                driverName = driverName,
-                                                vehiclePlate = vehiclePlate,
-                                                start = start,
-                                                end = end
-                                            )
-                                            withContext(Dispatchers.Main) {
-                                                routeName = ""
-                                                driverName = ""
-                                                vehiclePlate = ""
-                                                start = null
-                                                end = null
-                                                polylinePoints = emptyList()
-                                                durationText = ""
-                                                showSaveButton = false
-                                                showDialog = false
-                                                Toast.makeText(context, "Ruta guardada exitosamente", Toast.LENGTH_SHORT).show()
-                                            }
-                                        } catch (e: Exception) {
-                                            Log.e("MapScreenCon", "Error al guardar la ruta: ${e.message}", e)
-                                            withContext(Dispatchers.Main) {
-                                                Toast.makeText(context, "Error al guardar la ruta. Inténtalo de nuevo.", Toast.LENGTH_SHORT).show()
-                                            }
-                                        }
-                                    }
-                                }
-                            ) {
-                                Text("Guardar")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showDialog = false }) {
-                                Text("Cancelar")
-                            }
-                        }
-                    )
-                }
-
-                if (durationText.isNotEmpty()) {
-                    Text(
-                        text = "Tiempo estimado: $durationText",
-                        modifier = Modifier.padding(16.dp),
-                        color = Color.White
-                    )
-                }
+            // Imagen pequeña en la esquina superior derecha
+            // Botón de configuración
+            IconButton(
+                onClick = {
+                    navController.navigate("settingsScreen")
+                },
+                modifier = Modifier.size(48.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.btnconfig), // Asegúrate de tener esta imagen en res/drawable
+                    contentDescription = "Configuración",
+                    tint = Color.Gray
+                )
             }
         }
     }
