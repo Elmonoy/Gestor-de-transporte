@@ -289,7 +289,7 @@ fun MapScreenCon(navController: NavController) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF242f3e)) // Color negro
+                .background(Color(0xFF242f3e)) // Color negro popoooooooo
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 GoogleMap(
