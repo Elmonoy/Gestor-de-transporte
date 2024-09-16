@@ -82,7 +82,7 @@ fun AddUserView() {
             onClick = {
                 scope.launch {
                     isLoading = true
-                    // Obtener el conductorId
+                    // Obtener el conductorIdhdhsaodjoifjohfodhfjhfj
                     val conductorId = getNextConductorId()
 
                     // Crear el mapa de datos del usuario con el conductorId y la placa incluidos

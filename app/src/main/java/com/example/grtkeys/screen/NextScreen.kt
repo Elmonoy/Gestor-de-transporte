@@ -46,7 +46,8 @@ fun NextScreen(navController: NavHostController, modifier: Modifier = Modifier) 
                     close()
                 }
                 canvas.drawPath(path, androidx.compose.ui.graphics.Paint().apply {
-                    color = Color.Black
+                    color = Color.Yellow
+
                     alpha = 0.7f
                 })
             }
