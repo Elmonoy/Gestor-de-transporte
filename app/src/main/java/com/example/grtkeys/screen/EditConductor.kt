@@ -1,6 +1,5 @@
 package com.example.grtkeys.screen
 
-
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -90,7 +89,8 @@ fun EditConScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.White, shape = RoundedCornerShape(8.dp))
-                    .padding(8.dp)
+                    .padding(8.dp),
+                    singleLine = true
             )
         }
 
@@ -131,7 +131,8 @@ fun EditConScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.White, shape = RoundedCornerShape(8.dp))
-                        .padding(8.dp)
+                        .padding(8.dp),
+                         singleLine = true
                 )
             }
 
@@ -141,7 +142,7 @@ fun EditConScreen(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Image(
-                    painter = painterResource(id = R.drawable.btnconfig),
+                    painter = painterResource(id = R.drawable.placa),
                     contentDescription = null,
                     modifier = Modifier.size(24.dp)
                 )
@@ -153,7 +154,8 @@ fun EditConScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.White, shape = RoundedCornerShape(8.dp))
-                        .padding(8.dp)
+                        .padding(8.dp),
+                        singleLine = true
                 )
             }
 
@@ -167,7 +169,7 @@ fun EditConScreen(
                             try {
                                 // Guardar los datos en Firestore
                                 FirebaseFirestore.getInstance().collection("conductores").document(conductorId)
-                                    .update("nombreConductor", userName, "placaVehiculo", userPlate)
+                                    .update("NOMBRECONDUCTOR", userName, "PLACAVEHICULO", userPlate)
                                     .addOnSuccessListener {
                                         isLoading = false
                                         // Mostrar mensaje de éxito o realizar otra acción

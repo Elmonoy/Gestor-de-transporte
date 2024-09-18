@@ -13,6 +13,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -124,7 +125,9 @@ fun LoginConductor(navController: NavHostController) {
                     unfocusedLabelColor = Color.White,
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent
-                )
+
+                ),
+                singleLine = true // Opcional: asegura que el campo sea de una sola línea
             )
 
             Text(
@@ -149,7 +152,9 @@ fun LoginConductor(navController: NavHostController) {
                     unfocusedLabelColor = Color.White,
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent
-                )
+                ),
+                visualTransformation = PasswordVisualTransformation(), // Enmascara el texto
+                singleLine = true // Opcional: asegura que el campo sea de una sola línea
             )
 
             // Mostrar mensaje de error si es necesario

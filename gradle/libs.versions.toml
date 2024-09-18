@@ -1,5 +1,6 @@
 [versions]
 agp = "8.5.2"
+firebaseFunctionsKtx = "23.1.1"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -16,11 +17,13 @@ firebaseAuth = "23.0.0"
 appcompat = "1.7.0"
 constraintlayout = "2.1.4"
 navigationFragment = "2.7.7"
+firebaseFunctionsKtxVersion = "21.0.0"
 
 [libraries]
 
 androidx-navigation = { group = "androidx.navigation", name = "navigation-compose", version.ref = "nav_version" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+firebase-functions-ktx = { module = "com.google.firebase:firebase-functions-ktx", version.ref = "firebaseFunctionsKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -39,6 +42,7 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 androidx-navigation-fragment = { group = "androidx.navigation", name = "navigation-fragment", version.ref = "navigationFragment" }
+google-firebase-functions-ktx = { group = "com.google.firebase", name = "firebase-functions-ktx", version.ref = "firebaseFunctionsKtxVersion" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

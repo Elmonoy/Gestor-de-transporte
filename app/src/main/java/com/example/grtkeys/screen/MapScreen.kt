@@ -261,12 +261,11 @@ fun MapScreen(navController: NavHostController) {
     }
 
     // Función para buscar rutas en Firestore
+    // Función para buscar rutas en Firestore
     fun searchRoutes(query: String) {
         val db = FirebaseFirestore.getInstance()
         db.collection("rutas")
-            .whereGreaterThanOrEqualTo("nombreRuta", query)
-            .whereLessThanOrEqualTo("nombreRuta", query + '\uf8ff')
-            .get()
+            .get() // Obtén todas las rutas y filtra localmente
             .addOnSuccessListener { documents ->
                 val results = documents.map { doc ->
                     val origenStr = doc.getString("origen") ?: ""
@@ -282,10 +281,12 @@ fun MapScreen(navController: NavHostController) {
                         id = doc.id
                     )
                 }
-                searchResults = results
+                // Filtra localmente usando contains y luego limita los resultados a 4
+                searchResults = results.filter { it.name.contains(query, ignoreCase = true) }
+                    .take(4) // Limita a 4 resultados
             }
             .addOnFailureListener { exception ->
-                Log.w("Firestore", "Error getting documents: ", exception)
+                Log.w("Firestore", "Error obteniendo documentos: ", exception)
                 searchResults = emptyList()
             }
     }
@@ -372,12 +373,15 @@ fun MapScreen(navController: NavHostController) {
                     onClick = { showLogoutDialog = true },
                     modifier = Modifier
                         .padding(start = 5.dp)
-                        .size(38.dp)
+                        .size(38.dp),
+
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.salida),
 
                         contentDescription = "Cerrar sesión",
+                        tint = Color.White
+
                     )
                 }
             }
@@ -427,10 +431,10 @@ fun MapScreen(navController: NavHostController) {
                         Marker(state = MarkerState(position = it), title = "Punto de Destino")
                     }
                     if (polylinePoints.isNotEmpty()) {
-                        Polyline(points = polylinePoints, color = Color.Blue)
+                        Polyline(points = polylinePoints, color = Color.Green)
                     }
                     if (searchedPolylinePoints.isNotEmpty()) {
-                        Polyline(points = searchedPolylinePoints, color = Color.Red)
+                        Polyline(points = searchedPolylinePoints, color = Color.White)
                     }
                     selectedRoute?.let { route ->
                         Marker(state = MarkerState(position = route.startLatLng), title = "Inicio: ${route.name}", snippet = "Destino: ${route.endLatLng}")
@@ -465,14 +469,14 @@ fun MapScreen(navController: NavHostController) {
                     Text(
                         text = "Duración estimada de la ruta: $durationText",
                         modifier = Modifier.padding(bottom = 4.dp),
-                        style = TextStyle(fontSize = 16.sp, color = Color.Red)
+                        style = TextStyle(fontSize = 16.sp, color = Color.Green)
                     )
                 }
                 if (searchedDurationText.isNotEmpty()) {
                     Text(
                         text = "Duración estimada de la ruta buscada: $searchedDurationText",
                         modifier = Modifier.padding(bottom = 4.dp),
-                        style = TextStyle(fontSize = 16.sp, color = Color.Red)
+                        style = TextStyle(fontSize = 16.sp, color = Color.White)
                     )
                 }
             }

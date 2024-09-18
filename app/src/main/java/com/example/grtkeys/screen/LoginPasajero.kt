@@ -1,3 +1,4 @@
+
 package com.example.grtkeys.screen
 
 import android.widget.Toast
@@ -110,7 +111,8 @@ fun LoginPasajero(navController: NavHostController) {
                     containerColor = Color.Gray,
                     unfocusedIndicatorColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent
-                )
+                ),
+                singleLine = true // Asegura que sea una sola línea
             )
 
             Button(
@@ -257,4 +259,4 @@ fun LoginPasajero(navController: NavHostController) {
         // Snackbar Host para mostrar mensajes flotantes
         SnackbarHost(hostState = snackbarHostState)
     }
-}
+} 

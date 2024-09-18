@@ -289,7 +289,7 @@ fun MapScreenCon(navController: NavController) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF242f3e)) // Color negro popoooooooo
+                .background(Color(0xFF242f3e)) // Color negro
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 GoogleMap(
@@ -352,13 +352,62 @@ fun MapScreenCon(navController: NavController) {
                     ) {
                         Text(text = "Crear Rutas", color = Color.White)
                     }
+                    if (showDialog) {
+                        AlertDialog(
+                            onDismissRequest = { showDialog = false },
+                            confirmButton = {
+                                TextButton(onClick = {
+                                    showDialog = false
+                                    // Aquí puedes iniciar la lógica para guardar la ruta
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        saveRouteToFirestore(
+                                            firestore,
+                                            routeName,
+                                            driverName,
+                                            vehiclePlate,
+                                            start,
+                                            end
+                                        )
+                                    }
+                                }) {
+                                    Text("Guardar")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showDialog = false }) {
+                                    Text("Cancelar")
+                                }
+                            },
+                            title = { Text("Guardar Ruta") },
+                            text = {
+                                Column {
+                                    TextField(
+                                        value = routeName,
+                                        onValueChange = { routeName = it },
+                                        label = { Text("Nombre de la Ruta") },
+                                        singleLine = true)
+
+                                    TextField(value = driverName,
+                                        onValueChange = { driverName = it },
+                                        label = { Text("Nombre del Conductor") },
+                                        singleLine = true)
+                                    TextField(value = vehiclePlate,
+                                        onValueChange = { vehiclePlate = it },
+                                        label = { Text("Placa del Vehículo") },
+                                        singleLine = true
+                                    )
+                                }
+                            }
+                        )
+                    }
+
 
                     if (showSaveButton) {
                         Button(
                             onClick = { showDialog = true },
                             modifier = Modifier.wrapContentSize(),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Red // Color de fondo rojo para el botón
+                                containerColor = Color(0xFF746855)
                             )
                         ) {
                             Text("Guardar Ruta", color = Color.White)
@@ -384,8 +433,6 @@ fun MapScreenCon(navController: NavController) {
         }
     }
 }
-
-
 
 
 
