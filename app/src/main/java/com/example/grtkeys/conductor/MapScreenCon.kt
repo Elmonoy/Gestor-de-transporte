@@ -1,5 +1,6 @@
 package com.example.grtkeys.conductor
-
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
@@ -8,7 +9,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
@@ -20,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.maps.CameraUpdateFactory
+
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
@@ -40,14 +41,15 @@ import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import androidx.compose.foundation.Image
+
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+
 import androidx.navigation.NavController
 import com.example.grtkeys.R
+import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.LatLngBounds
 
 
 @SuppressLint("StaticFieldLeak")
@@ -229,11 +231,6 @@ private val darkModeStyle = """
   }
 ]
 """
-
-
-
-
-
 @Composable
 fun MapScreenCon(navController: NavController) {
     val context = LocalContext.current
@@ -246,10 +243,17 @@ fun MapScreenCon(navController: NavController) {
     var durationText by remember { mutableStateOf("") }
     var location by remember { mutableStateOf<LatLng?>(null) }
     var showSaveButton by remember { mutableStateOf(false) }
+    var showFinishButton by remember { mutableStateOf(false) } // Nueva variable para mostrar el botón "Finalizar Ruta"
     var routeName by remember { mutableStateOf("") }
     var driverName by remember { mutableStateOf("") }
     var vehiclePlate by remember { mutableStateOf("") }
     var showDialog by remember { mutableStateOf(false) }
+
+    var showRoutesDialog by remember { mutableStateOf(false) }
+    var routesList by remember { mutableStateOf<List<Map<String, Any>>>(emptyList()) }
+    var showEditDialog by remember { mutableStateOf(false) }
+    var routeToEdit by remember { mutableStateOf<Map<String, Any>?>(null) }
+    var routeOriginalName by remember { mutableStateOf("") }
 
     val locationPermissionGranted = remember { mutableStateOf(false) }
     val launcher = rememberLauncherForActivityResult(
@@ -289,7 +293,7 @@ fun MapScreenCon(navController: NavController) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF242f3e)) // Color negro
+                .background(Color(0xFF242f3e))
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 GoogleMap(
@@ -297,7 +301,7 @@ fun MapScreenCon(navController: NavController) {
                     cameraPositionState = cameraPositionState,
                     properties = MapProperties(
                         isMyLocationEnabled = true,
-                        mapStyleOptions = MapStyleOptions(darkModeStyle) // Aplicar el estilo oscuro
+                        mapStyleOptions = MapStyleOptions(darkModeStyle)
                     ),
                     uiSettings = MapUiSettings(
                         myLocationButtonEnabled = true
@@ -325,16 +329,17 @@ fun MapScreenCon(navController: NavController) {
                     if (polylinePoints.isNotEmpty()) {
                         Polyline(
                             points = polylinePoints,
-                            color = Color.Green // Configura el color de la línea a verde
+                            color = Color.Green
                         )
                     }
                 }
 
+                // Botones para crear ruta y ver lista de rutas
                 Row(
                     modifier = Modifier
                         .padding(16.dp)
                         .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     Button(
                         onClick = {
@@ -345,67 +350,35 @@ fun MapScreenCon(navController: NavController) {
                             showSaveButton = false
                             Toast.makeText(context, "Selecciona punto de origen y final", Toast.LENGTH_SHORT).show()
                         },
-                        modifier = Modifier.wrapContentSize(),
+                        modifier = Modifier.weight(1f).padding(8.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF746855) //0xFF746855 Color de fondo para el botón
+                            containerColor = Color(0xFF746855)
                         )
                     ) {
                         Text(text = "Crear Rutas", color = Color.White)
                     }
-                    if (showDialog) {
-                        AlertDialog(
-                            onDismissRequest = { showDialog = false },
-                            confirmButton = {
-                                TextButton(onClick = {
-                                    showDialog = false
-                                    // Aquí puedes iniciar la lógica para guardar la ruta
-                                    CoroutineScope(Dispatchers.IO).launch {
-                                        saveRouteToFirestore(
-                                            firestore,
-                                            routeName,
-                                            driverName,
-                                            vehiclePlate,
-                                            start,
-                                            end
-                                        )
-                                    }
-                                }) {
-                                    Text("Guardar")
-                                }
-                            },
-                            dismissButton = {
-                                TextButton(onClick = { showDialog = false }) {
-                                    Text("Cancelar")
-                                }
-                            },
-                            title = { Text("Guardar Ruta") },
-                            text = {
-                                Column {
-                                    TextField(
-                                        value = routeName,
-                                        onValueChange = { routeName = it },
-                                        label = { Text("Nombre de la Ruta") },
-                                        singleLine = true)
 
-                                    TextField(value = driverName,
-                                        onValueChange = { driverName = it },
-                                        label = { Text("Nombre del Conductor") },
-                                        singleLine = true)
-                                    TextField(value = vehiclePlate,
-                                        onValueChange = { vehiclePlate = it },
-                                        label = { Text("Placa del Vehículo") },
-                                        singleLine = true
-                                    )
+                    Button(
+                        onClick = {
+                            CoroutineScope(Dispatchers.IO).launch {
+                                routesList = fetchRoutesFromFirestore(firestore)
+                                withContext(Dispatchers.Main) {
+                                    showRoutesDialog = true
                                 }
                             }
+                        },
+                        modifier = Modifier.weight(1f).padding(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF746855)
                         )
+                    ) {
+                        Text(text = "Lista de Rutas", color = Color.White)
                     }
-
 
                     if (showSaveButton) {
                         Button(
                             onClick = { showDialog = true },
-                            modifier = Modifier.wrapContentSize(),
+                            modifier = Modifier.weight(1f).padding(8.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0xFF746855)
                             )
@@ -414,26 +387,231 @@ fun MapScreenCon(navController: NavController) {
                         }
                     }
                 }
-            }
+                // Dialogo para guardar la ruta
+                if (showDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showDialog = false },
+                        title = { Text(text = "Guardar Ruta") },
+                        text = {
+                            Column {
+                                TextField(
+                                    value = routeName,
+                                    onValueChange = { routeName = it },
+                                    label = { Text("Nombre de la Ruta") }
+                                )
+                                TextField(
+                                    value = driverName,
+                                    onValueChange = { driverName = it },
+                                    label = { Text("Nombre del Conductor") }
+                                )
+                                TextField(
+                                    value = vehiclePlate,
+                                    onValueChange = { vehiclePlate = it },
+                                    label = { Text("Placa del Vehículo") }
+                                )
+                            }
+                        },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    CoroutineScope(Dispatchers.IO).launch {
+                                        // Guardar la ruta en Firestore
+                                        saveRouteToFirestore(
+                                            firestore,
+                                            routeName,
+                                            driverName,
+                                            vehiclePlate,
+                                            start,
+                                            end
+                                        )
+                                        withContext(Dispatchers.Main) {
+                                            Toast.makeText(context, "Ruta guardada exitosamente 🚗💨", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                    showDialog = false
+                                }
+                            ) {
+                                Text("Guardar")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDialog = false }) {
+                                Text("Cancelar")
+                            }
+                        }
+                    )
+                }
 
-            // Imagen pequeña en la esquina superior derecha
-            // Botón de configuración
-            IconButton(
-                onClick = {
-                    navController.navigate("settingsScreen")
-                },
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.btnconfig), // Asegúrate de tener esta imagen en res/drawable
-                    contentDescription = "Configuración",
-                    tint = Color.Gray
-                )
+
+                // Mostrar el botón "Finalizar Ruta" solo cuando se está recorriendo una ruta
+                if (showFinishButton) {
+                    Button(
+                        onClick = {
+                            start = null
+                            end = null
+                            polylinePoints = emptyList()
+                            durationText = ""
+                            showSaveButton = false
+                            showFinishButton = false // Ocultar el botón "Finalizar Ruta" después de finalizar
+                            Toast.makeText(context, "Ruta finalizada", Toast.LENGTH_SHORT).show()
+                        },
+                        modifier = Modifier.padding(16.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Red
+                        )
+                    ) {
+                        Text("Finalizar Ruta", color = Color.White)
+                    }
+                }
+
+                // Diálogo de rutas guardadas
+                if (showRoutesDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showRoutesDialog = false },
+                        confirmButton = {
+                            TextButton(onClick = { showRoutesDialog = false }) {
+                                Text("Cerrar")
+                            }
+                        },
+                        title = { Text("Rutas Guardadas") },
+                        text = {
+                            // Envolver la lista de rutas en un LazyColumn para permitir el desplazamiento
+                            LazyColumn(
+                                modifier = Modifier.fillMaxHeight(0.6f) // Controla la altura máxima del diálogo
+                            ) {
+                                items(routesList) { route ->
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 8.dp) // Espaciado entre rutas
+                                    ) {
+                                        Text(route["nombreRuta"] as String, modifier = Modifier.padding(bottom = 4.dp)) // Nombre de la ruta
+
+                                        // Fila para botones "Recorrer" y "Eliminar"
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween // Asegura que los botones estén separados
+                                        ) {
+                                            Button(
+                                                onClick = {
+                                                    val origen = route["origen"] as String
+                                                    val destino = route["destino"] as String
+                                                    val origenCoords = origen.split(", ").map { it.toDouble() }
+                                                    val destinoCoords = destino.split(", ").map { it.toDouble() }
+                                                    start = LatLng(origenCoords[0], origenCoords[1])
+                                                    end = LatLng(destinoCoords[0], destinoCoords[1])
+
+                                                    // Llamada para crear la ruta
+                                                    createRoute(start!!, end!!) { route, duration ->
+                                                        polylinePoints = route
+                                                        durationText = duration
+                                                        showSaveButton = true
+                                                        showFinishButton = true // Mostrar el botón "Finalizar Ruta"
+
+                                                        // Actualizar la posición de la cámara (centrar y hacer zoom)
+                                                        CoroutineScope(Dispatchers.Main).launch {
+                                                            val bounds = LatLngBounds.Builder()
+                                                            bounds.include(start!!)  // Añadir el punto inicial
+                                                            bounds.include(end!!)    // Añadir el punto final
+
+                                                            // Puedes incluir los puntos intermedios si quieres ajustar a toda la ruta
+                                                            route.forEach { point ->
+                                                                bounds.include(point)
+                                                            }
+
+                                                            cameraPositionState.animate(
+                                                                update = CameraUpdateFactory.newLatLngBounds(bounds.build(), 100),
+                                                                durationMs = 1000  // Duración del zoom animado
+                                                            )
+                                                        }
+                                                    }
+                                                    showRoutesDialog = false
+                                                },
+                                                modifier = Modifier.weight(1f).padding(end = 8.dp),
+                                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF242f3e))
+                                            ) {
+                                                Text("Recorrer", color = Color.White)
+                                            }
+
+                                            Button(
+                                                onClick = {
+                                                    CoroutineScope(Dispatchers.IO).launch {
+                                                        deleteRouteFromFirestore(firestore, route["nombreRuta"] as String)
+                                                        routesList = fetchRoutesFromFirestore(firestore) // Actualizar la lista de rutas
+                                                    }
+                                                },
+                                                modifier = Modifier.weight(1f).padding(start = 8.dp), // Espacio entre los botones
+                                                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF746855))
+                                            ) {
+                                                Text("Eliminar", color = Color.White)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    )
+                }
+
+
             }
         }
+    } else {
+        Text("Por favor, permite el acceso a la ubicación.")
+    }
+
+    // Botón de configuración en la esquina superior derecha
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        // Mapa o el contenido principal aquí
+
+        // Botón de configuración en la esquina superior derecha
+        IconButton(
+            onClick = {
+                navController.navigate("settingsScreen")
+            },
+            modifier = Modifier
+                .align(Alignment.TopStart) // Alinea el botón en la esquina superior derecha
+                .padding(16.dp) // Padding opcional para separarlo un poco de los bordes
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.btnconfig),
+                contentDescription = "Configuración",
+                tint = Color.Gray
+            )
+        }
+    }
+
+}
+
+// Función para eliminar una ruta de Firestore
+private suspend fun deleteRouteFromFirestore(
+    firestore: FirebaseFirestore,
+    routeName: String
+) {
+    try {
+        firestore.collection("rutas").document(routeName).delete().await()
+        Log.d("Firebase", "Ruta eliminada exitosamente")
+    } catch (e: Exception) {
+        Log.e("Firebase", "Error al eliminar la ruta: ${e.message}", e)
     }
 }
 
+
+// Función para obtener las rutas guardadas en Firebase
+suspend fun fetchRoutesFromFirestore(firestore: FirebaseFirestore): List<Map<String, Any>> {
+    return try {
+        val routesSnapshot = firestore.collection("rutas").get().await()
+        routesSnapshot.documents.mapNotNull { document ->
+            document.data
+        }
+    } catch (e: Exception) {
+        Log.e("Firebase", "Error al obtener las rutas: ${e.message}", e)
+        emptyList()
+    }
+}
 
 
 private suspend fun saveRouteToFirestore(

@@ -220,7 +220,7 @@ fun LoginPasajero(navController: NavHostController) {
                                     } else if (exception is FirebaseAuthInvalidCredentialsException) {
                                         coroutineScope.launch {
                                             snackbarHostState.showSnackbar(
-                                                "Contraseña incorrecta. Inténtalo de nuevo.",
+                                                "El correo no está registrado. Por favor, regístrate",
                                                 duration = SnackbarDuration.Short
                                             )
                                         }

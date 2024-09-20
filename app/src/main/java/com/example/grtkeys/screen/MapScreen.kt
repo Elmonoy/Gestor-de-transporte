@@ -417,15 +417,10 @@ fun MapScreen(navController: NavHostController) {
                     uiSettings = MapUiSettings(
                         myLocationButtonEnabled = true
                     ),
-                    onMapClick = { latLng ->
-                        if (end == null) {
-                            end = latLng
-                            calculateRoute(start!!, end!!)
-                        }
-                    }
+
                 ) {
                     start?.let {
-                        Marker(state = MarkerState(position = it), title = "Punto de Origen")
+
                     }
                     end?.let {
                         Marker(state = MarkerState(position = it), title = "Punto de Destino")
@@ -434,7 +429,7 @@ fun MapScreen(navController: NavHostController) {
                         Polyline(points = polylinePoints, color = Color.Green)
                     }
                     if (searchedPolylinePoints.isNotEmpty()) {
-                        Polyline(points = searchedPolylinePoints, color = Color.White)
+                        Polyline(points = searchedPolylinePoints, color = Color.Green)
                     }
                     selectedRoute?.let { route ->
                         Marker(state = MarkerState(position = route.startLatLng), title = "Inicio: ${route.name}", snippet = "Destino: ${route.endLatLng}")
@@ -453,18 +448,18 @@ fun MapScreen(navController: NavHostController) {
             ) {
                 Button(
                     onClick = {
-                        end = null
-                        polylinePoints = emptyList()
-                        durationText = ""
-                        Toast.makeText(context, "Selecciona el punto de destino", Toast.LENGTH_SHORT).show()
+                        selectedRoute?.let {
+                            showRouteOnMap(it)
+                        } ?: Toast.makeText(context, "Selecciona una ruta desde el buscador", Toast.LENGTH_SHORT).show()
                     },
-                    colors = ButtonDefaults.buttonColors(  Color(0xFF746855)), // Botón rojo
+                    colors = ButtonDefaults.buttonColors(Color(0xFF746855)),
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)
                 ) {
-                    Text(text = "Calcular ruta", color = Color.White) // Texto blanco en el botón
+                    Text(text = "Calcular ruta", color = Color.White)
                 }
+
                 if (durationText.isNotEmpty()) {
                     Text(
                         text = "Duración estimada de la ruta: $durationText",
@@ -481,9 +476,7 @@ fun MapScreen(navController: NavHostController) {
                 }
             }
         }
-    } else {
-        // Mensaje para solicitar permisos
-        Text(text = "Permiso de ubicación necesario")
+
     }
 }
 
